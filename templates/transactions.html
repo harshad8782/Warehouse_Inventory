@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Stock Transactions</h2>
+
+<!-- Add Transaction Form -->
+<form method="POST" class="mb-4">
+  {% csrf_token %}
+  <div class="row mb-2">
+    <div class="col-md-3">
+      <label>Transaction Type</label>
+      <select name="transaction_type" class="form-control" required>
+        <option value="IN">Stock In</option>
+        <option value="OUT">Stock Out</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label>Reference No</label>
+      <input type="text" name="reference_no" class="form-control" required>
+    </div>
+    <div class="col-md-3">
+      <label>Product</label>
+      <select name="product_id" class="form-control" required>
+        {% for product in products %}
+        <option value="{{ product.id }}">{{ product.name }} ({{ product.sku }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label>Quantity</label>
+      <input type="number" name="quantity" min="1" class="form-control" required>
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary">Add Transaction</button>
+</form>
+
+<hr>
+
+<!-- List of Transactions -->
+<h3>All Transactions</h3>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Reference</th>
+      <th>Type</th>
+      <th>Product</th>
+      <th>Quantity</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for txn in transactions %}
+      {% for detail in txn.details.all %}
+      <tr>
+        <td>{{ txn.reference_no }}</td>
+        <td>{{ txn.get_transaction_type_display }}</td>
+        <td>{{ detail.product.name }}</td>
+        <td>{{ detail.quantity }}</td>
+        <td>{{ txn.created_at|date:"Y-m-d H:i" }}</td>
+      </tr>
+      {% endfor %}
+    {% empty %}
+      <tr><td colspan="5" class="text-center">No transactions yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
